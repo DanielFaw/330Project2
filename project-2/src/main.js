@@ -13,7 +13,7 @@ import * as canvas from './canvas.js';
 
 // 1 - here we are faking an enumeration
 const DEFAULTS = Object.freeze({
-    sound1: "media/New Adventure Theme.mp3"
+    sound1: "media/EDEN - sex.mp3"
 });
 
 const drawParams = {
