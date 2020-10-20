@@ -59,16 +59,41 @@ function draw(params = {}) {
         let margin = 5;
         let screenWidthForBars = canvasWidth - (audioData.length * barSpacing) - margin * 2;
         let barWidth = screenWidthForBars / audioData.length;
-        let barHeight = 200;
-        let topSpacing = 100;
+        let barHeight = 250;
+        let topSpacing = 50;
 
         ctx.save();
-        ctx.fillStyle = `rgba(255,255,255,0.50)`;
+        
         ctx.strokeStyle = `grba(0,0,0,0.50)`;
 
         for (let i = 0; i < audioData.length; i++) {
-            ctx.fillRect(margin + i * (barWidth + barSpacing), topSpacing + 256 - audioData[i], barWidth, barHeight);
+
+
+            //Set colors
+            if(audioData[i] < 85)
+            {
+                //ctx.fillStyle = `rgba(255,50,50,0.50)`;
+                ctx.fillStyle = utils.makeColor(255-85 + audioData[i], audioData[i], audioData[i], .5);
+            } else if(audioData[i] < 170)
+            {
+                //ctx.fillStyle = `rgba(50,255,50,0.50)`;
+                ctx.fillStyle = utils.makeColor(audioData[i]*2/3,audioData[i] * 3 / 2, audioData[i]*2/3, .5);
+            }
+            else if (audioData[i] < 256)
+            {
+                //ctx.fillStyle = `rgba(50,50,255,0.50)`;
+                ctx.fillStyle = utils.makeColor(audioData[i]/3, audioData[i]/3, audioData[i], .5);
+            }
+            else
+            {
+                //This is if there is nothing
+                ctx.fillStyle = utils.makeColor(200,200,200, .5);
+            }
+
+
             ctx.strokeRect(margin + i * (barWidth + barSpacing), topSpacing + 256 - audioData[i], barWidth, barHeight);
+            ctx.fillRect(margin + i * (barWidth + barSpacing), topSpacing + 256 - audioData[i], barWidth, barHeight);
+            
         }
         ctx.restore();
     }
@@ -129,16 +154,16 @@ function draw(params = {}) {
         for (let i = 0; i < length; i += 4) {
 
             // C) randomly change every 20th pixel to red
-            if (params.showNoise && Math.random() < .05) {
+            if (params.showNoise && Math.random() < .01) {
                 // data[i] is the red channel
                 // data[i+1] is the green channel
                 // data[i+2] is the blue channel
                 // data[i+3] is the alpha channel
                 // zero out the red and green and blue channels
                 // make the red channel 100% red
-                data[i] = 50;
-                data[i + 1] = 255
-                data[i + 2] = 50;
+                data[i] = 250;
+                data[i + 1] = 250;
+                data[i + 2] = 250;
                 
             } // end if
         } // end for
