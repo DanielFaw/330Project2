@@ -11,6 +11,10 @@ import * as utils from './utils.js';
 
 let ctx, canvasWidth, canvasHeight, gradient, analyserNode, audioData;
 
+let counter1 = 50 + (Math.random() * 10);
+let counter2 = 50 + (Math.random() * 10);
+let counter3 = 50 + (Math.random() * 10);
+
 
 function setupCanvas(canvasElement, analyserNodeRef) {
     // create drawing context
@@ -19,11 +23,11 @@ function setupCanvas(canvasElement, analyserNodeRef) {
     canvasHeight = canvasElement.height;
     // create a gradient that runs top to bottom
     gradient = utils.getLinearGradient(ctx, 0, 0, 0, canvasHeight, [
-        { percent: 0, color: "blue" },
-        //{percent:.25,color:"green"},
-        //{percent:.5,color:"yellow"},
-        { percent: .5, color: "magenta" },
-        { percent: 1, color: "red" }]);
+        { percent: 0, color: "black" },
+        { percent: .25, color: "green"},
+        { percent: .5, color: "black" },
+        { percent: .75, color: "green"},
+        { percent: 1, color: "black" }]);
     //	gradient = utils.getLinearGradient(ctx,0,0,0,canvasHeight,[{percent:0,color:"blue"},{percent:.25,color:"green"},{percent:.5,color:"yellow"},{percent:.75,color:"red"},{percent:1,color:"magenta"}]);
     // keep a reference to the analyser node
     analyserNode = analyserNodeRef;
@@ -57,42 +61,43 @@ function draw(params = {}) {
     if (params.showBars) {
         let barSpacing = 4;
         let margin = 5;
-        let screenWidthForBars = canvasWidth - (audioData.length * barSpacing) - margin * 2;
-        let barWidth = screenWidthForBars / audioData.length;
-        let barHeight = 250;
+
+        //A lot of the bars just don't ever do anything, so im removing those
+        let usedLength = (audioData.length - 32);
+
+        let screenHeightForBars = canvasHeight - (usedLength * barSpacing) - margin * 2;
+        let screenWidthForBars = canvasWidth - (usedLength * barSpacing) - margin * 2;
+        let barWidth = screenWidthForBars / usedLength;
+        let barHeight = (screenHeightForBars / usedLength) * 2;
+        let barLength = 250;
         let topSpacing = 50;
+        
 
         ctx.save();
         
+
         ctx.strokeStyle = `grba(0,0,0,0.50)`;
 
-        for (let i = 0; i < audioData.length; i++) {
+        for (let i = 0; i < usedLength; i++) {
+            ctx.fillStyle = utils.makeColor(audioData[i], audioData[i], audioData[i], .5);
 
+            //Fill half on the left going right, half on the other side
 
-            //Set colors
-            if(audioData[i] < 85)
+            if(i < usedLength / 2)
             {
-                //ctx.fillStyle = `rgba(255,50,50,0.50)`;
-                ctx.fillStyle = utils.makeColor(255-85 + audioData[i], audioData[i], audioData[i], .5);
-            } else if(audioData[i] < 170)
-            {
-                //ctx.fillStyle = `rgba(50,255,50,0.50)`;
-                ctx.fillStyle = utils.makeColor(audioData[i]*2/3,audioData[i] * 3 / 2, audioData[i]*2/3, .5);
-            }
-            else if (audioData[i] < 256)
-            {
-                //ctx.fillStyle = `rgba(50,50,255,0.50)`;
-                ctx.fillStyle = utils.makeColor(audioData[i]/3, audioData[i]/3, audioData[i], .5);
+                //ctx.strokeRect(startingX, startingY, width, height)
+
+                
+                ctx.strokeRect(0,  2 + margin + i * (barHeight + barSpacing), topSpacing + audioData[i], barLength);
+                ctx.fillRect(0, 2 + margin + i * (barHeight + barSpacing), topSpacing + audioData[i], barLength);
             }
             else
             {
-                //This is if there is nothing
-                ctx.fillStyle = utils.makeColor(200,200,200, .5);
+                ctx.strokeRect(canvasWidth - (topSpacing + audioData[i]), (2 + margin + (i - usedLength / 2) * (barHeight + barSpacing)), topSpacing + audioData[i], barLength);
+                ctx.fillRect(canvasWidth - (topSpacing + audioData[i]), (2 + margin + (i - usedLength / 2) * (barHeight + barSpacing)), topSpacing + audioData[i], barLength);
             }
-
-
-            ctx.strokeRect(margin + i * (barWidth + barSpacing), topSpacing + 256 - audioData[i], barWidth, barHeight);
-            ctx.fillRect(margin + i * (barWidth + barSpacing), topSpacing + 256 - audioData[i], barWidth, barHeight);
+            //ctx.strokeRect(margin + i * (barWidth + barSpacing), topSpacing + audioData[i], barWidth, barHeight);
+            //ctx.fillRect(margin + i * (barWidth + barSpacing), topSpacing + audioData[i], barWidth, barHeight);
             
         }
         ctx.restore();
@@ -100,37 +105,61 @@ function draw(params = {}) {
 
     // 5 - draw circles
 
+
     if (params.showCircles) {
+
+        //This circle changes its size based on the intensity of sound
+        //It also flows between colors
+
+        
+        
+
+
+        let usedLength = (audioData.length - 32);
         let maxRadius = canvasHeight / 4;
         ctx.save();
-        ctx.globalAlpha = 0.5;
-        for (let i = 0; i < audioData.length; i++) {
-            //redish circles
-            let percent = audioData[i] / 255;
+        //ctx.globalAlpha = 0.5;
 
-            let circleRadius = percent * maxRadius;
-            ctx.beginPath();
-            ctx.fillStyle = utils.makeColor(255, 111, 111, .34 - percent / 3.0);
-            ctx.arc(canvasWidth / 2, canvasHeight / 2, circleRadius, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
-
-
-            //blueish, bigger, more transparent
-            ctx.beginPath();
-            ctx.fillStyle = utils.makeColor(0, 0, 255, .10 - percent / 10.0);
-            ctx.arc(canvasWidth / 2, canvasHeight / 2, circleRadius * 1.5, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
-
-            //yellowish, smaller
-            ctx.beginPath();
-            ctx.fillStyle = utils.makeColor(200, 200, 0, .5 - percent / 5.0);
-            ctx.arc(canvasWidth / 2, canvasHeight / 2, circleRadius * .50, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
-
+        let base = 0;
+        for (let i = 0; i < usedLength; i++) {           
+           base += audioData[i];
         }
+
+        base /= usedLength;
+
+        let percent = base / usedLength;
+
+        counter1++;
+
+        if(counter1 >= 255)
+        {
+            counter1 = 255;
+            counter2++;
+        }
+
+        if(counter2 >= 255)
+        {
+            counter2 = 255;
+            counter3++;
+        }
+
+        if(counter3 >= 255)
+        {
+            counter1 = 50 + (Math.random() * 10);
+            counter2 = 50 + (Math.random() * 10);
+            counter3 = 50 + (Math.random() * 10);
+        }
+
+        
+        
+
+        let circleRadius = percent * maxRadius;
+        ctx.beginPath();
+        ctx.fillStyle = utils.makeColor(counter1,counter2,counter3,1);
+        ctx.arc(canvasWidth / 2, canvasHeight / 2, circleRadius, 0, 2 * Math.PI, false);
+        ctx.fill();
+        ctx.closePath();
+        ctx.restore();
     }
 
     // 6 - bitmap manipulation
