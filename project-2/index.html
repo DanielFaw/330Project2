@@ -2,12 +2,14 @@
 <html lang="en">
 <head>
 	<meta charset="utf-8" />
-	<title>Audio Visualizer</title>
+	<title>Daniel Faw's Audio Visualizer</title>
 	<link href="styles/default-styles.css" type="text/css" rel="stylesheet" />
+	<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 	<script src="./src/loader.js" type="module"></script>
 </head>
 <body>
 <main>
+	<h1>Audio Visualizer</h1>
 	<canvas width="1000" height="600"></canvas>
 	<div id="controls">
 		<section>
@@ -36,11 +38,41 @@
 			<span><input type="checkbox" id="gradientCB" checked><label for="gradientCB">Show Background</label></span>
 			<span><input type="checkbox" id="barsCB" checked><label for="barsCB">Show Bars</label></span>
 			<span><input type="checkbox" id="circlesCB" checked><label for="circlesCB">Show Circles</label></span>
-			<!-- we'll use this 4th checkbox soon! -->
 			<span><input type="checkbox" id="noiseCB" ><label for="noiseCB">Show Noise</label></span>
 			<span><input type="checkbox" id="invertCB" ><label for="invertCB">Show Invert</label></span>
-			<span><input type="checkbox" id="embossCB" ><label for="embossCB">Show Emboss</label></span>
-		  </section>
+			<span><input type="checkbox" id="monochromeCB" ><label for="monochromeCB">Show Monochrome</label></span>
+		</section>
+
+		<section>
+			<span id="soundRad">
+				<input type="radio" name="soundR" value = "freq" checked>Frequency Data
+				<input type="radio" name="soundR" value = "wave">Waveform Data
+			</span>
+		</section>
+
+		<section>
+			Circle Color:
+			<span id="circleColor">
+				<input type = "radio" name = "circleCol" value="red"> Red
+				<input type = "radio" name = "circleCol" value="blue"> Blue
+				<input type = "radio" name = "circleCol" value="green"> Green
+				<input type = "radio" name = "circleCol" value="purple"> Purple
+				<input type = "radio" name = "circleCol" value="fade" checked> Fading Colors
+			</span>
+		</section>
+
+		<section>
+			Bar Color:
+			<span id = "barColor">
+				<input type = "radio" name = "barCol" value="red"> Red
+				<input type = "radio" name = "barCol" value="blue"> Blue
+				<input type = "radio" name = "barCol" value="green"> Green
+				<input type = "radio" name = "barCol" value="purple"> Purple
+				<input type = "radio" name = "barCol" value="fade" checked> Monochrome Fade
+			</span>
+
+
+		</section>
 	</div>
 </main>
 </body>

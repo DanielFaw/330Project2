@@ -17,13 +17,17 @@ const DEFAULTS = Object.freeze({
 });
 
 const drawParams = {
+    showFreq: true,
     showGradient: true,
     showBars: true,
     showCircles: true,
     showNoise: false,
     showInvert: false,
-    showEmboss: false
+    showMonochrome: false,
+    barColor: "fade",
+    circleColor: "fade"
 };
+
 
 function init() {
     console.log("init called");
@@ -116,8 +120,20 @@ function setupUI(canvasElement) {
         drawParams.showInvert = e.target.checked;
     }
 
-    document.querySelector("#embossCB").onchange = e => {
-        drawParams.showEmboss = e.target.checked;
+    document.querySelector("#monochromeCB").onchange = e => {
+        drawParams.showMonochrome = e.target.checked;
+    }
+
+    document.querySelector("#soundRad").onchange = e => {
+        drawParams.showFreq = !drawParams.showFreq;
+    }
+
+    document.querySelector("#circleColor").onchange = e => {
+        drawParams.circleColor = e.target.value;
+    }
+
+    document.querySelector("#barColor").onchange = e => {
+        drawParams.barColor = e.target.value;
     }
 
 } // end setupUI

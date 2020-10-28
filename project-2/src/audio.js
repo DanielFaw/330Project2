@@ -11,6 +11,7 @@ const DEFAULTS = Object.freeze({
     numSamples  :       256
 });
 
+
 // 4 - create a new array of 8-bit integers (0-255)
 // this is a typed array to hold the audio frequency data
 let audioData = new Uint8Array(DEFAULTS.numSamples/2);
@@ -74,4 +75,4 @@ function setVolume(value){
     gainNode.gain.value = value;
 }
 
-export {audioCtx,setupWebaudio,playCurrentSound,pauseCurrentSound,loadSoundFile,setVolume,analyserNode};
+export {audioCtx,setupWebaudio,playCurrentSound,pauseCurrentSound,loadSoundFile,setVolume,analyserNode, element};

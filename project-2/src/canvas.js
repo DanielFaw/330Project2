@@ -8,12 +8,17 @@
 */
 
 import * as utils from './utils.js';
+import * as audio from './audio.js';
 
 let ctx, canvasWidth, canvasHeight, gradient, analyserNode, audioData;
 
-let counter1 = 50 + (Math.random() * 10);
-let counter2 = 50 + (Math.random() * 10);
-let counter3 = 50 + (Math.random() * 10);
+let counter1 = 255;
+let counter2 = 255;
+let counter3 = 255;
+let value;
+
+let currentTime;
+let duration;
 
 
 function setupCanvas(canvasElement, analyserNodeRef) {
@@ -24,9 +29,9 @@ function setupCanvas(canvasElement, analyserNodeRef) {
     // create a gradient that runs top to bottom
     gradient = utils.getLinearGradient(ctx, 0, 0, 0, canvasHeight, [
         { percent: 0, color: "black" },
-        { percent: .25, color: "green"},
+        { percent: .25, color: "green" },
         { percent: .5, color: "black" },
-        { percent: .75, color: "green"},
+        { percent: .75, color: "green" },
         { percent: 1, color: "black" }]);
     //	gradient = utils.getLinearGradient(ctx,0,0,0,canvasHeight,[{percent:0,color:"blue"},{percent:.25,color:"green"},{percent:.5,color:"yellow"},{percent:.75,color:"red"},{percent:1,color:"magenta"}]);
     // keep a reference to the analyser node
@@ -38,9 +43,15 @@ function setupCanvas(canvasElement, analyserNodeRef) {
 function draw(params = {}) {
     // 1 - populate the audioData array with the frequency data from the analyserNode
     // notice these arrays are passed "by reference" 
-    analyserNode.getByteFrequencyData(audioData);
-    // OR
-    //analyserNode.getByteTimeDomainData(audioData); // waveform data
+
+    if(params.showFreq)
+    {
+        analyserNode.getByteFrequencyData(audioData);
+    }
+    else
+    {
+        analyserNode.getByteTimeDomainData(audioData);
+    }
 
     // 2 - draw background
     ctx.save();
@@ -71,34 +82,42 @@ function draw(params = {}) {
         let barHeight = (screenHeightForBars / usedLength) * 2;
         let barLength = 250;
         let topSpacing = 50;
-        
+
 
         ctx.save();
-        
+
 
         ctx.strokeStyle = `grba(0,0,0,0.50)`;
+        
 
         for (let i = 0; i < usedLength; i++) {
-            ctx.fillStyle = utils.makeColor(audioData[i], audioData[i], audioData[i], .5);
 
-            //Fill half on the left going right, half on the other side
-
-            if(i < usedLength / 2)
+            if(params.barColor == "fade")
             {
-                //ctx.strokeRect(startingX, startingY, width, height)
-
-                
-                ctx.strokeRect(0,  2 + margin + i * (barHeight + barSpacing), topSpacing + audioData[i], barLength);
-                ctx.fillRect(0, 2 + margin + i * (barHeight + barSpacing), topSpacing + audioData[i], barLength);
+                ctx.fillStyle = utils.makeColor(audioData[i], audioData[i], audioData[i], .5);
             }
             else
             {
+                ctx.fillStyle = params.barColor;
+            }
+            
+
+            //Fill half on the left going right, half on the other side
+
+            if (i < usedLength / 2) {
+                //ctx.strokeRect(startingX, startingY, width, height)
+
+
+                ctx.strokeRect(0, 2 + margin + i * (barHeight + barSpacing), topSpacing + audioData[i], barLength);
+                ctx.fillRect(0, 2 + margin + i * (barHeight + barSpacing), topSpacing + audioData[i], barLength);
+            }
+            else {
                 ctx.strokeRect(canvasWidth - (topSpacing + audioData[i]), (2 + margin + (i - usedLength / 2) * (barHeight + barSpacing)), topSpacing + audioData[i], barLength);
                 ctx.fillRect(canvasWidth - (topSpacing + audioData[i]), (2 + margin + (i - usedLength / 2) * (barHeight + barSpacing)), topSpacing + audioData[i], barLength);
             }
             //ctx.strokeRect(margin + i * (barWidth + barSpacing), topSpacing + audioData[i], barWidth, barHeight);
             //ctx.fillRect(margin + i * (barWidth + barSpacing), topSpacing + audioData[i], barWidth, barHeight);
-            
+
         }
         ctx.restore();
     }
@@ -111,8 +130,8 @@ function draw(params = {}) {
         //This circle changes its size based on the intensity of sound
         //It also flows between colors
 
-        
-        
+
+
 
 
         let usedLength = (audioData.length - 32);
@@ -121,44 +140,118 @@ function draw(params = {}) {
         //ctx.globalAlpha = 0.5;
 
         let base = 0;
-        for (let i = 0; i < usedLength; i++) {           
-           base += audioData[i];
+        for (let i = 0; i < usedLength; i++) {
+            base += audioData[i];
         }
 
         base /= usedLength;
 
         let percent = base / usedLength;
 
-        counter1++;
 
-        if(counter1 >= 255)
-        {
-            counter1 = 255;
-            counter2++;
+        //Randomize the colors a bit - using randomness and sine waves
+        let amount = Math.random();
+        value = utils.roundNear(Math.tan(amount * Math.PI * 2));
+
+        if (amount < .34) {
+
+            if (counter1 > 200) {
+                counter1 -= Math.abs(value);
+
+            }
+            else if (counter1 < 50) {
+                counter1 += Math.abs(value);
+            }
+            else {
+                counter1 += value;
+            }
+        }
+        else if (amount < .67) {
+
+            if (counter2 > 200) {
+                counter2 -= Math.abs(value);
+
+            }
+            else if (counter2 < 50) {
+                counter2 += Math.abs(value);
+            }
+            else {
+                counter2 += value;
+            }
+        }
+        else {
+
+            if (counter3 > 200) {
+                counter3 -= Math.abs(value);
+
+            }
+            else if (counter1 < 50) {
+                counter3 += Math.abs(value);
+            }
+            else {
+                counter3 += value;
+            }
         }
 
-        if(counter2 >= 255)
+
+        if(params.circleColor == "fade")
         {
-            counter2 = 255;
-            counter3++;
+            ctx.fillStyle = utils.makeColor(counter1, counter2, counter3, 1);
+        }
+        else
+        {
+            ctx.fillStyle = params.circleColor;
         }
 
-        if(counter3 >= 255)
-        {
-            counter1 = 50 + (Math.random() * 10);
-            counter2 = 50 + (Math.random() * 10);
-            counter3 = 50 + (Math.random() * 10);
-        }
 
-        
-        
 
         let circleRadius = percent * maxRadius;
         ctx.beginPath();
-        ctx.fillStyle = utils.makeColor(counter1,counter2,counter3,1);
+        
         ctx.arc(canvasWidth / 2, canvasHeight / 2, circleRadius, 0, 2 * Math.PI, false);
         ctx.fill();
+        ctx.strokeStyle = "black";
+        ctx.stroke();
         ctx.closePath();
+        ctx.restore();
+    }
+
+
+    
+
+    /*Drawing the progress bar - always there, and always on top*/
+    if (!audio.element.currentTime)
+    { 
+        currentTime= 0;
+    }
+    else
+    {
+        currentTime = audio.element.currentTime;
+    }
+
+    if(!audio.element.duration)
+    {
+        duration = 0;
+    }
+    else
+    {
+        duration = audio.element.duration;
+    }
+
+    //Make sure there are usable numbers for the progress bar
+    if(currentTime != 0 && duration != 0)
+    {
+        let percentDone = currentTime / duration;
+        let lineThick = 20;
+        ctx.save();
+        ctx.strokeStyle = "white";
+        ctx.fillStyle = "magenta";
+        ctx.beginPath();
+        ctx.moveTo(0, canvasHeight - lineThick/2);
+        ctx.lineTo(canvasWidth * percentDone, canvasHeight - lineThick/2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
         ctx.restore();
     }
 
@@ -177,7 +270,7 @@ function draw(params = {}) {
     let width = imageData.width;
 
     if (params.showNoise) {
-        
+
 
         // B) Iterate through each pixel, stepping 4 elements at a time (which is the RGBA for 1 pixel)
         for (let i = 0; i < length; i += 4) {
@@ -193,7 +286,7 @@ function draw(params = {}) {
                 data[i] = 250;
                 data[i + 1] = 250;
                 data[i + 2] = 250;
-                
+
             } // end if
         } // end for
 
@@ -201,29 +294,37 @@ function draw(params = {}) {
         ctx.putImageData(imageData, 0, 0);
     }
 
-    if(params.showInvert){
-        
-        
+    
+
+    if (params.showMonochrome) {
+        for (let i = 0; i < length; i+=4) {
+            if (i % 4 == 3) continue; 
+
+            let avg = (data[i] + data[i+1] + data[i+2])/3;
+            data[i] = avg;
+            data[i+1] = avg;
+            data[i+2] = avg;
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+    }
+
+    if (params.showInvert) {
+
+
         //data[i+3] is the alpha but we're leaving that alone
 
-        for(let i = 0; i < length; i+=4)
-        {
-            let red = data[i], green=data[i+1], blue=data[i+2];
-            data[i] = 255-red;
-            data[i+1] = 255-green;
-            data[i+2] = 255-blue;
+        for (let i = 0; i < length; i += 4) {
+            let red = data[i], green = data[i + 1], blue = data[i + 2];
+            data[i] = 255 - red;
+            data[i + 1] = 255 - green;
+            data[i + 2] = 255 - blue;
         }
-        ctx.putImageData(imageData,0,0);
+        ctx.putImageData(imageData, 0, 0);
     }
 
-    if(params.showEmboss){
-        for(let i = 0; i < length; i++){
-            if(i%4 == 3) continue; //skip alpha channel
-            data[i] = 127 + 2*data[i] - data[i+4] - data[i + width * 4];
-        }
 
-        ctx.putImageData(imageData,0,0);
-    }
+
 }
 
 export { setupCanvas, draw };

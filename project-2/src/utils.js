@@ -23,6 +23,18 @@ const makeColor = (red, green, blue, alpha = 1) => {
     }
     return lg;
   };
+
+  const roundNear = (amt) => {
+    //Expects a value between +1/-1
+    if(amt > 0)
+    {
+      return 1;
+    }
+    else
+    {
+      return -1;
+    }
+  };
   
   
   const goFullscreen = (element) => {
@@ -38,4 +50,4 @@ const makeColor = (red, green, blue, alpha = 1) => {
       // .. and do nothing if the method is not supported
   };
   
-  export {makeColor, getRandomColor, getLinearGradient, goFullscreen};
+  export {makeColor, getRandomColor, getLinearGradient, goFullscreen, roundNear};
